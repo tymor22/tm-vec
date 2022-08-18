@@ -15,17 +15,19 @@ Once your conda enviroment is installed and activated (i.e. `conda activate tmve
 `pip install tm-vec`. If you are using a GPU, you may need to reinstall the gpu version of pytorch.  
 See the [pytorch](https://pytorch.org/) webpage for more details.
 
-# Download models
-Different TM-vec models can be downloaded online as follows:
-To download the TM-vec model trained on SwissModel pairs:
+# Models
+Download the TM-vec model trained on SwissModel pairs:
+
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_swiss_model.ckpt
 
-To download the TM-vec config file for the model trained on SwissModel pairs: 
+Download the TM-vec config file for the model trained on SwissModel pairs: 
+
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_swiss_model_params.json
 
+Download the TM-vec model trained on CATH pairs:
 
-To download the TM-vec model trained on CATH pairs:
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model.ckpt
 
-To download TM-vec config file for model trained on CATH pairs: 
-https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model_params.json
+Download TM-vec config file for model trained on CATH pairs: 
+
+wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model_params.json
