@@ -28,6 +28,6 @@ Download the TM-vec model trained on CATH pairs:
 
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model.ckpt
 
-Download TM-vec config file for model trained on CATH pairs: 
+Download the TM-vec config file for model trained on CATH pairs: 
 
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model_params.json
