@@ -1,3 +1,6 @@
+# Paper
+TM-Vec: template modeling vectors for fast homology detection and alignment: https://www.biorxiv.org/content/10.1101/2022.07.25.501437v1
+
 # Installation
 
 First create a conda environment with python=3.9 installed.  If you are using cpu, use
@@ -12,7 +15,7 @@ Once your conda enviroment is installed and activated (i.e. `conda activate tmve
 `pip install tm-vec`. If you are using a GPU, you may need to reinstall the gpu version of pytorch.  
 See the [pytorch](https://pytorch.org/) webpage for more details.
 
-
+# Download models
 Different TM-vec models can be downloaded online as follows:
 To download the TM-vec model trained on SwissModel pairs:
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_swiss_model.ckpt
