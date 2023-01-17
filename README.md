@@ -42,18 +42,19 @@ Arguments for running TM-Vec search + DeepBLAST alignments from the command line
 - There are several model parameters to provide at the command line. These include the weights for the TM-Vec model that will embed the user’s query sequences (note that this model should be the same model as the model used to make the lookup embedding database- i.e. TM-Vec CATH model or TM-Vec SWISS-MODEL model.), the config file for the TM-Vec model, and the DeepBLAST alignment model that will run alignments. 
 
 
+Example run:
+scripts/tm_vec_run.py --input_data --k_nearest_neighbors --align --path_output_neigbhors --path_output_embeddings --path_output_alignments --database --metadata --database_sequences --tm_vec_model_path --tm_vec_config_path --tm_vec_align_path
+
+
 User parameters:
 
 —input_data
-
 “Fasta file for query proteins”
 
 —k_nearest_neighbors
-
 “Number of nearest neighbors to return (default is 5 per query)”
 
 —align
-
 “Option to return alignments (boolean)”
 
 Output paths:
@@ -63,41 +64,33 @@ Output paths:
 “Nearest neighbor outputs”
 
 —path_output_embeddings
-
 “Embeddings for queried sequences”
 
 —path_output_alignments
-
 “Alignment output file if alignment is true”
 
 Database parameters:
 
 —database
-
 “Lookup database that will be queried. These are the embeddings.” 
 
 —metadata
-
 “Metadata file for the lookup database”
 
 —database_sequences
-
 "Lookup database sequences."
 
 TM-Vec model:
 
 —tm_vec_model_path
-
 “TM-Vec model path (weights)”
 
 —tm_vec_config_path
-
 “TM-Vec model config path”
 
 DeepBLAST model:
 
 —tm_vec_align_path
-
 “Align model path”
 
 
