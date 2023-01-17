@@ -45,47 +45,59 @@ Arguments for running TM-Vec search + DeepBLAST alignments from the command line
 User parameters:
 
 —input_data
+
 “Fasta file for query proteins”
 
 —k_nearest_neighbors
+
 “Number of nearest neighbors to return (default is 5 per query)”
 
 —align
+
 “Option to return alignments (boolean)”
 
 Output paths:
 
 —path_output_neigbhors
+
 “Nearest neighbor outputs”
 
 —path_output_embeddings
+
 “Embeddings for queried sequences”
 
 —path_output_alignments
+
 “Alignment output file if alignment is true”
 
 Database parameters:
 
 —database
+
 “Lookup database that will be queried. These are the embeddings.” 
 
 —metadata
+
 “Metadata file for the lookup database”
 
 —database_sequences
+
 "Lookup database sequences."
 
 TM-Vec model:
 
 —tm_vec_model_path
+
 “TM-Vec model path (weights)”
 
 —tm_vec_config_path
+
 “TM-Vec model config path”
 
 DeepBLAST model:
 
 —tm_vec_align_path
+
 “Align model path”
 
 
