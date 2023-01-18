@@ -19,22 +19,26 @@ See the [pytorch](https://pytorch.org/) webpage for more details.
 Download the model weights/config of the base TM-vec model trained on SwissModel pairs (trained on protein chains up to 300 residues long, works best on shorter sequences):
 
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_swiss_model.ckpt
+
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_swiss_model_params.json
 
 Download the model weights/config of the large TM-vec model trained on SwissModel pairs (trained on protein chains up to 1000 residues long):
 
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_swiss_model_large.ckpt
+
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_swiss_model_large_params.json
 
 Download the model weights/config of the large TM-vec model trained on CATH pairs (trained on CATH S100 domains sampled from ProtTucker training domains):
 
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model_large.ckpt
+
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model_large_params.json
 
 
 Download the model weights/config of the base TM-vec model trained on CATH pairs (trained on CATH S40):
 
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model.ckpt
+
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model_params.json
 
 
