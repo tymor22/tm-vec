@@ -7,6 +7,7 @@ from tm_vec.embed_structure_model import trans_basic_block, trans_basic_block_Co
 
 from transformers import T5EncoderModel, T5Tokenizer
 import re
+import faiss
 
 
 #Function to extract ProtTrans embedding for a sequence
@@ -50,3 +51,21 @@ def cosine_similarity_tm(output_seq1, output_seq2):
     dist_seq = cos(output_seq1, output_seq2)
 
     return(dist_seq)
+
+
+def load_database(path):
+    lookup_database = np.load(path)
+    #Build an indexed database
+    d = lookup_database.shape[1] 
+    index = faiss.IndexFlatIP(d)
+    faiss.normalize_L2(lookup_database)
+    index.add(lookup_database)             
+
+    return(index)
+
+
+def query(index, queries, k=10):
+    faiss.normalize_L2(queries)
+    D, I = index.search(queries, k)
+
+    return(D, I)
