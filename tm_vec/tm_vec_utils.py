@@ -53,6 +53,17 @@ def cosine_similarity_tm(output_seq1, output_seq2):
     return(dist_seq)
 
 
+def encode(sequences, model_deep, model, tokenizer, device):   
+    i = 0
+    embed_all_sequences=[]
+    while i < len(sequences): 
+        protrans_sequence = featurize_prottrans(sequences[i:i+1], model, tokenizer, device)
+        embedded_sequence = embed_tm_vec(protrans_sequence, model_deep, device)
+        embed_all_sequences.append(embedded_sequence)
+        i = i + 1
+    return np.concatenate(embed_all_sequences, axis=0)
+
+
 def load_database(path):
     lookup_database = np.load(path)
     #Build an indexed database
