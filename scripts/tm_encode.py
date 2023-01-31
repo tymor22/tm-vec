@@ -27,6 +27,13 @@ parser.add_argument("--tm-vec-model",
                     required=True,
                     help="Model path for TM-Vec embedding model"
 )
+parser.add_argument("--tm-vec-config-path",
+                    type=Path,
+                    required=True,
+                    help=("Config path for TM-Vec embedding model. "
+                          "This is used to encode the proteins as "
+                          "vectors to construct the database.")
+)
 parser.add_argument("--protrans-model",
                     type=Path,
                     default=None,
@@ -36,21 +43,15 @@ parser.add_argument("--protrans-model",
                           "automatically be downloaded.")
 )
 parser.add_argument("--device",
-                    type=int,
+                    type=str,
                     default=None,
                     required=False,
                     help=(
                         "The device id to load the model onto. "
                         "This will specify whether or not a GPU "
-                        "will be utilized."
+                        "will be utilized.  If `gpu` is specified ",
+                        "then the first gpu device will be used."
                     )
-)
-parser.add_argument("--tm-vec-config-path",
-                    type=Path,
-                    required=True,
-                    help=("Config path for TM-Vec embedding model. "
-                          "This is used to encode the proteins as "
-                          "vectors to construct the database.")
 )
 parser.add_argument("--output",
                     type=Path,
@@ -67,7 +68,10 @@ args = parser.parse_args()
 
 #Set device
 if torch.cuda.is_available() and args.device is not None:
-    device = torch.device(f'cuda:{args.device}')
+    if args.device == 'gpu':
+        device = torch.device(f'cuda:0')
+    else:
+        device = torch.device(f'cuda:{int(args.device)}')
 else:
     device = torch.device('cpu')
 
