@@ -58,10 +58,6 @@ parser.add_argument("--output",
                     required=True,
                     help="Output path for the database files"
 )
-parser.add_argument("--path_output_metadata",
-                    type=Path,
-                    help="Output path for the metadata"
-)
 
 #Load arguments
 args = parser.parse_args()
