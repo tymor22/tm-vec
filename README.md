@@ -1,6 +1,8 @@
 # Paper
 TM-Vec: template modeling vectors for fast homology detection and alignment: https://www.biorxiv.org/content/10.1101/2022.07.25.501437v1
 
+[Embed sequences with TM-vec](https://colab.research.google.com/github/tymor22/tm-vec/blob/master/Embed_sequences_using_TM_Vec.ipynb)
+
 # Installation
 
 First create a conda environment with python=3.9 installed.  If you are using cpu, use
