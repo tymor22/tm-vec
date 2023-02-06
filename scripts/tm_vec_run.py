@@ -12,16 +12,16 @@ import faiss
 from pathlib import Path
 import argparse
 import pickle
-from deepblast.trainer import LightningAligner
+from deepblast.trainer import DeepBLAST
 from deepblast.dataset.utils import pack_sequences
 from deepblast.dataset.utils import states2alignment
 
-parser = argparse.ArgumentParser(description='Process TM-Vec arguments')
+parser = argparse.ArgumentParser(description='Process TM-Vec arguments', add_help=True)
 
-parser.add_argument("--input_data",
+parser.add_argument("--query",
         type=Path,
         required=True,
-        help="Input data"
+        help="Input fasta-formatted data to query against database."
 )
 
 parser.add_argument("--database",
@@ -36,22 +36,41 @@ parser.add_argument("--metadata",
         help="Metadata for queried database"
 )
 
-parser.add_argument("--tm_vec_model_path",
+parser.add_argument("--tm-vec-model",
         type=Path,
         required=True,
         help="Model path for embedding"
 )
 
-parser.add_argument("--tm_vec_config_path",
+parser.add_argument("--tm-vec-config",
         type=Path,
         required=True,
         help="Config path for embedding"
 )
 
-parser.add_argument("--tm_vec_align_path",
+parser.add_argument("--deepblast-model",
         type=Path,
-        help="Align model path"
+        help="DeepBLAST model path"
 )
+
+parser.add_argument("--protrans-model",
+                    type=Path,
+                    default=None,
+                    required=False,
+                    help=("Model path for the ProTrans embedding model. "
+                          "If this is not specified, then the model will "
+                          "automatically be downloaded.")
+)
+parser.add_argument("--device",
+                    type=str,
+                    default=None,
+                    required=False,
+                    help=(
+                        "The device id to load the model onto. "
+                        "This will specify whether or not a GPU "
+                        "will be utilized.  If `gpu` is specified ",
+                        "then the first gpu device will be used."
+                    )
 
 parser.add_argument("--k_nearest_neighbors",
         type=int,
@@ -91,11 +110,22 @@ parser.add_argument("--path_output_alignments",
 args = parser.parse_args()
 
 #Set device
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+if torch.cuda.is_available() and args.device is not None:
+    if args.device == 'gpu':
+        device = torch.device(f'cuda:0')
+    else:
+        device = torch.device(f'cuda:{int(args.device)}')
+else:
+    device = torch.device('cpu')
 
-#Load the ProtTrans model and ProtTrans tokenizer
-tokenizer = T5Tokenizer.from_pretrained("Rostlab/prot_t5_xl_uniref50", do_lower_case=False )
-model = T5EncoderModel.from_pretrained("Rostlab/prot_t5_xl_uniref50")
+if args.protrans_model is None:
+    #Load the ProtTrans model and ProtTrans tokenizer
+    tokenizer = T5Tokenizer.from_pretrained("Rostlab/prot_t5_xl_uniref50", do_lower_case=False )
+    model = T5EncoderModel.from_pretrained("Rostlab/prot_t5_xl_uniref50")
+else:
+    tokenizer = T5Tokenizer.from_pretrained(args.protrans_model, do_lower_case=False )
+    model = T5EncoderModel.from_pretrained(args.protrans_model)
+
 gc.collect()
 model = model.to(device)
 model = model.eval()
@@ -169,7 +199,10 @@ if args.metadata is not None:
 #Alignment section
 #If we are also aligning proteins, load tm_vec align and align nearest neighbors if true
 if args.align == True:
-    align_model = LightningAligner.load_from_checkpoint(args.tm_vec_align_path)
+    align_model = DeepBLAST.load_from_checkpoint(
+        args.load_from_checkpoint, lm=lm, tokenizer=tokenizer,
+        alignment_mode=args.alignment_mode,  # TODO
+        device=args.device)
     align_model = align_model.to(device)
 
     #Read in database sequences
