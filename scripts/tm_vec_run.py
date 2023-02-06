@@ -71,22 +71,21 @@ parser.add_argument("--device",
                         "will be utilized.  If `gpu` is specified ",
                         "then the first gpu device will be used."
                     )
+)
 
-parser.add_argument("--k_nearest_neighbors",
+parser.add_argument("--alignment-mode",
+                    type=str,
+                    default='smith-waterman',
+                    required=False,
+                    help=(
+                        "`smith-waterman` or `needleman-wunch`"
+                    )
+)
+
+parser.add_argument("--k-nearest-neighbors",
         type=int,
         default=5,
-        help="Number of nearest neighbhors"
-)
-
-
-parser.add_argument("--align",
-        type=bool,
-        help="Whether to return alignments"
-)
-
-parser.add_argument("--database_sequences",
-        type=Path,
-        help="Database sequences"
+        help="Number of nearest neighbhors to return for each query."
 )
 
 
@@ -133,15 +132,15 @@ print("ProtTrans model downloaded")
 
 
 #Load the Tm_Vec_Align TM model
-tm_vec_model_config = trans_basic_block_Config.from_json(args.tm_vec_config_path)
-model_deep = trans_basic_block.load_from_checkpoint(args.tm_vec_model_path, config=tm_vec_model_config)
+tm_vec_model_config = trans_basic_block_Config.from_json(args.tm_vec_config)
+model_deep = trans_basic_block.load_from_checkpoint(args.tm_vec_model, config=tm_vec_model_config)
 model_deep = model_deep.to(device)
 model_deep = model_deep.eval()
 print("TM-Vec model loaded")
 
 
 #Read in query sequences
-with open(args.input_data) as handle:
+with open(args.query) as handle:
     headers = []
     seqs = []
     for record in SeqIO.parse(handle, "fasta"):
@@ -198,15 +197,15 @@ if args.metadata is not None:
 
 #Alignment section
 #If we are also aligning proteins, load tm_vec align and align nearest neighbors if true
-if args.align == True:
+if args.deepblast_model is not None:
     align_model = DeepBLAST.load_from_checkpoint(
-        args.load_from_checkpoint, lm=lm, tokenizer=tokenizer,
+        args.deepblast_model, lm=model, tokenizer=tokenizer,
         alignment_mode=args.alignment_mode,  # TODO
         device=args.device)
     align_model = align_model.to(device)
 
     #Read in database sequences
-    with open(args.database_sequences) as handle_db:
+    with open(args.database) as handle_db:
         seqs_db = []
         for record in SeqIO.parse(handle_db, "fasta"):
             seqs_db.append(str(record.seq))
