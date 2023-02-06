@@ -30,6 +30,12 @@ parser.add_argument("--database",
         help="Database to query"
 )
 
+parser.add_argument("--database-sequences",
+        type=Path,
+        required=True,
+        help="Database that contains the corresponding protein sequences."
+)
+
 
 parser.add_argument("--metadata",
         type=Path,
@@ -205,7 +211,7 @@ if args.deepblast_model is not None:
     align_model = align_model.to(device)
 
     #Read in database sequences
-    with open(args.database) as handle_db:
+    with open(args.database_sequences) as handle_db:
         seqs_db = []
         for record in SeqIO.parse(handle_db, "fasta"):
             seqs_db.append(str(record.seq))
