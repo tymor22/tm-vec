@@ -45,7 +45,7 @@ wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model_p
 
 # Databases
 
-We have embedded several sequence databases that users can search against. We have included embeddings for all CATH domains and SWISS-PROT sequences here. See the search tutorials or the scripts folder for how to run searches against these databases. Metadata for these sequences is position indexed. The embeddings and meta data are stored as numpy array (npy format) which can loaded as follows: np.load(file_path, allow_pickle=True).
+We have embedded several sequence databases that users can search against. We have included embeddings for all CATH domains and SWISS-PROT sequences here. See the search tutorials or the scripts folder for how to run searches against these databases. Metadata for these sequences is position indexed. The embeddings and metadata are stored as numpy array (npy format) which can loaded as follows: np.load(file_path, allow_pickle=True).
 
 Download the embeddings and metadata for CATH domains (the model that you should query with is tm_vec_cath_model_large)
 
