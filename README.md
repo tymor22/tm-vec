@@ -43,6 +43,21 @@ wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model.c
 
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model_params.json
 
+# Databases
+
+We have embedded several sequence databases that users can search against. We have included embeddings for all CATH domains and SWISS-PROT sequences here. See the search tutorials or the scripts folder for how to run searches against these databases. Metadata for these sequences is position indexed. The embeddings and meta data are stored as numpy array (npy format) which can loaded as follows: np.load(file_path, allow_pickle=True).
+
+Download the embeddings and metadata for CATH domains (the model that you should query with is tm_vec_cath_model_large)
+
+wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large.npy
+
+wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large_metadata.npy
+
+Download the embeddings and metadata for SWISS-PROT chains (the model that you should query with here is tm_vec_swiss_model_large)
+
+wget https://users.flatironinstitute.org/thamamsy/public_www/swiss_large.npy
+
+wget https://users.flatironinstitute.org/thamamsy/public_www/swiss_large_metadata.npy
 
 
 # Run TM-Vec + DeepBLAST from the command line
