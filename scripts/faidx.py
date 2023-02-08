@@ -1,0 +1,17 @@
+from tm_vec.fasta import Indexer
+import argparse
+
+
+if __name__=="__main__":
+
+    parser = argparse.ArgumentParser(description=\
+        'Constructs fasta index')
+    parser.add_argument(\
+        '--fasta', type=str, required=False,
+        help='The output fasta file')
+    parser.add_argument(\
+        '--faidx', type=str, required=False,
+        help='The output faidx file')
+    args = parser.parse_args()
+    indexer = Indexer(args.fasta, args.faidx)
+    indexer.index()
