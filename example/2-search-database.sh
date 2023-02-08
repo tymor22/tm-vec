@@ -12,7 +12,8 @@ tm_vec_run.py \
     --tm-vec-model tm_vec_cath_model.ckpt \
     --tm-vec-config tm_vec_cath_model_params.json \
     --database embeddings_cath_s100_final.npy \
-    --database-sequences ? \
+    --database-fasta cath-domain-seqs-large.fa \
+    --database-faidx cath-domain-seqs-large.fai \
     --deepblast-model deepblast-l8.ckpt \
     --device 'gpu' \
     --path_output_neigbhors neighbors.npy \
