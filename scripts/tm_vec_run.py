@@ -37,7 +37,7 @@ parser.add_argument("--database-fasta",
         help="Database that contains the corresponding protein sequences in fasta format."
 )
 
-parser.add_argument("--database-fai",
+parser.add_argument("--database-faidx",
         type=Path,
         required=True,
         help="Fasta index for database fasta format."
