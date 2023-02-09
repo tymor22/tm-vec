@@ -1,17 +1,33 @@
+#!/bin/bash
+#SBATCH --mail-type=ALL         # Mail events (NONE, BEGIN, END, FAIL, ALL)
+#SBATCH --mail-user=jmorton@flatironinstitute.org
+#SBATCH -C a100,ib
+#SBATCH -p gpu
+#SBATCH --gpus=1
+#SBATCH --time=60:00:00
+#SBATCH --tasks-per-node=1
+
+source ~/ceph/venvs/deepblast/bin/activate
+
+module -q purge
+module load gcc python cuda cudnn
+
 
 #wget https://users.flatironinstitute.org/thamamsy/public_www/embeddings_cath_s100_final.npy
+#wget https://users.flatironinstitute.org/thamamsy/public_www/embeddings_cath_s100_w_metadata.tsv
+#wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large.npy
+#wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large_metadata.npy
+#wget https://users.flatironinstitute.org/thamamsy/public_www/cath-domain-seqs-large.fa
+#wget https://users.flatironinstitute.org/thamamsy/public_www/cath-domain-seqs-large.fai
 #wget https://users.flatironinstitute.org/jmorton/public_www/deepblast-public-data/checkpoints/deepblast-l8.ckpt
-
-# usage: tm_vec_run.py [-h] --query QUERY --database DATABASE [--metadata METADATA] --tm-vec-model TM_VEC_MODEL --tm-vec-config TM_VEC_CONFIG [--deepblast-model DEEPBLAST_MODEL]
-#                      [--protrans-model PROTRANS_MODEL] [--device DEVICE] [--k_nearest_neighbors K_NEAREST_NEIGHBORS] [--align ALIGN] [--database_sequences DATABASE_SEQUENCES]
-#                      --path_output_neigbhors PATH_OUTPUT_NEIGBHORS [--path_output_embeddings PATH_OUTPUT_EMBEDDINGS] [--path_output_alignments PATH_OUTPUT_ALIGNMENTS]
 
 
 tm_vec_run.py \
-    --query bagel.fa \
+    --query test.fa \
     --tm-vec-model tm_vec_cath_model.ckpt \
     --tm-vec-config tm_vec_cath_model_params.json \
-    --database embeddings_cath_s100_final.npy \
+    --database cath_large.npy \
+    --metadata cath_large_metadata.npy \
     --database-fasta cath-domain-seqs-large.fa \
     --database-faidx cath-domain-seqs-large.fai \
     --deepblast-model deepblast-l8.ckpt \

@@ -120,6 +120,9 @@ parser.add_argument("--path_output_alignments",
 #Load arguments
 args = parser.parse_args()
 
+#Load metadata if it exists
+metadata_database = np.load(args.metadata)
+
 #Set device
 if torch.cuda.is_available() and args.device is not None:
     if args.device == 'gpu':
@@ -191,9 +194,6 @@ index.add(query_database)
 k = args.k_nearest_neighbors
 D, I = index.search(queries, k)
 
-
-#Load metadata if it exists
-metadata_database = np.load(args.metadata)
 #Return the metadata for the nearest neighbor results
 near_ids = []
 
