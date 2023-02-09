@@ -1,16 +1,20 @@
 #!/bin/bash
 #SBATCH --mail-type=ALL         # Mail events (NONE, BEGIN, END, FAIL, ALL)
 #SBATCH --mail-user=jmorton@flatironinstitute.org
-#SBATCH -C a100,ib
-#SBATCH -p gpu
-#SBATCH --gpus=1
+# -C a100,ib
+# -p gpu
+# --gpus=1
 #SBATCH --time=60:00:00
 #SBATCH --tasks-per-node=1
 
-source ~/ceph/venvs/deepblast/bin/activate
+source ~/ceph/venv/deepblast/bin/activate
 
 module -q purge
 module load gcc python cuda cudnn
+
+export CUDA_HOME=$CUDA_BASE
+
+python /mnt/home/jmorton/ceph/research/gert/deep_blast_training/collect_env_details.py
 
 
 #wget https://users.flatironinstitute.org/thamamsy/public_www/embeddings_cath_s100_final.npy
@@ -30,6 +34,7 @@ tm_vec_run.py \
     --metadata cath_large_metadata.npy \
     --database-fasta cath-domain-seqs-large.fa \
     --database-faidx cath-domain-seqs-large.fai \
+    --protrans-model ~/ceph/prot_t5_xl_uniref50 \
     --deepblast-model deepblast-l8.ckpt \
     --device 'gpu' \
     --path_output_neigbhors neighbors.npy \

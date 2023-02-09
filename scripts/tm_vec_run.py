@@ -130,6 +130,7 @@ if torch.cuda.is_available() and args.device is not None:
     else:
         device = torch.device(f'cuda:{int(args.device)}')
 else:
+    print('Models will be loaded on CPU.')
     device = torch.device('cpu')
 
 if args.protrans_model is None:
@@ -205,6 +206,7 @@ for i in range(I.shape[0]):
 
 near_ids = np.array(near_ids)
 
+del model_deep  # need to clear space for DeepBLAST aligner
 
 #Alignment section
 #If we are also aligning proteins, load tm_vec align and align nearest neighbors if true
@@ -212,7 +214,7 @@ if args.deepblast_model is not None:
     align_model = DeepBLAST.load_from_checkpoint(
         args.deepblast_model, lm=model, tokenizer=tokenizer,
         alignment_mode=args.alignment_mode,  # TODO
-        device=args.device)
+        device=device)
     align_model = align_model.to(device)
     seq_db = Indexer(args.database_fasta, args.database_faidx)
     seq_db.load()
