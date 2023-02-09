@@ -4,6 +4,7 @@ import pandas as pd
 import torch
 from tm_vec.embed_structure_model import trans_basic_block, trans_basic_block_Config
 from tm_vec.tm_vec_utils import featurize_prottrans, embed_tm_vec
+from tm_vec.fasta import Indexer
 from transformers import T5EncoderModel, T5Tokenizer
 import re
 import gc
@@ -30,12 +31,17 @@ parser.add_argument("--database",
         help="Database to query"
 )
 
-parser.add_argument("--database-sequences",
+parser.add_argument("--database-fasta",
         type=Path,
         required=True,
-        help="Database that contains the corresponding protein sequences."
+        help="Database that contains the corresponding protein sequences in fasta format."
 )
 
+parser.add_argument("--database-faidx",
+        type=Path,
+        required=True,
+        help="Fasta index for database fasta format."
+)
 
 parser.add_argument("--metadata",
         type=Path,
@@ -114,6 +120,9 @@ parser.add_argument("--path_output_alignments",
 #Load arguments
 args = parser.parse_args()
 
+#Load metadata if it exists
+metadata_database = np.load(args.metadata)
+
 #Set device
 if torch.cuda.is_available() and args.device is not None:
     if args.device == 'gpu':
@@ -185,20 +194,16 @@ index.add(query_database)
 k = args.k_nearest_neighbors
 D, I = index.search(queries, k)
 
+#Return the metadata for the nearest neighbor results
+near_ids = []
 
-#Load metadata if it exists
-if args.metadata is not None:
-    metadata_database = np.load(args.metadata)
-    #Return the metadata for the nearest neighbor results
-    near_ids = []
+print("meta data loaded")
 
-    print("meta data loaded")
+for i in range(I.shape[0]):
+    meta = metadata_database[I[i]]
+    near_ids.append(list(meta))
 
-    for i in range(I.shape[0]):
-        meta = metadata_database[I[i]]
-        near_ids.append(list(meta))
-
-    near_ids = np.array(near_ids)
+near_ids = np.array(near_ids)
 
 
 #Alignment section
@@ -209,19 +214,17 @@ if args.deepblast_model is not None:
         alignment_mode=args.alignment_mode,  # TODO
         device=args.device)
     align_model = align_model.to(device)
-
-    #Read in database sequences
-    with open(args.database_sequences) as handle_db:
-        seqs_db = []
-        for record in SeqIO.parse(handle_db, "fasta"):
-            seqs_db.append(str(record.seq))
+    seq_db = Indexer(args.database_fasta, args.database_faidx)
+    seq_db.load()
 
     alignments = []
     for i in range(I.shape[0]):
         alignments_i = []
         for j in range(I.shape[1]):
             x = flat_seqs[i]
-            y = seqs_db[I[i,j]]
+            seq_i = metadata_database[I[i, j]]
+
+            y = seq_db[seq_i]
             pred_alignment = align_model.align(x, y)
             x_aligned, y_aligned = states2alignment(pred_alignment, x, y)
             alignments_i.append([x_aligned, pred_alignment, y_aligned])
