@@ -39,7 +39,7 @@ parser.add_argument("--database-fasta",
 
 parser.add_argument("--database-faidx",
         type=Path,
-        required=True,
+        required=False,
         help="Fasta index for database fasta format."
 )
 
