@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --mail-type=ALL         # Mail events (NONE, BEGIN, END, FAIL, ALL)
-#SBATCH --mail-user=jmorton@flatironinstitute.org
 # -C a100,ib
 # -p gpu
 # --gpus=1
