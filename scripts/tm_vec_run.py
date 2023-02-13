@@ -87,10 +87,10 @@ parser.add_argument("--device",
 
 parser.add_argument("--alignment-mode",
                     type=str,
-                    default='smith-waterman',
+                    default='needleman-wunch',
                     required=False,
                     help=(
-                        "`smith-waterman` or `needleman-wunch`"
+                        "`smith-waterman` or `needleman-wunch`."
                     )
 )
 
@@ -227,9 +227,14 @@ if args.deepblast_model is not None:
             seq_i = metadata_database[I[i, j]]
 
             y = seq_db[seq_i]
-            pred_alignment = align_model.align(x, y)
-            x_aligned, y_aligned = states2alignment(pred_alignment, x, y)
-            alignments_i.append([x_aligned, pred_alignment, y_aligned])
+            try :
+                pred_alignment = align_model.align(x, y)
+                # Note : there is an edge case that smith-waterman will throw errors, but
+                # needleman-wunsch won't.
+                x_aligned, y_aligned = states2alignment(pred_alignment, x, y)
+                alignments_i.append([x_aligned, pred_alignment, y_aligned])
+            except:
+                alignments_i.append([x, None, y])
 
         alignments.append(alignments_i)
 
