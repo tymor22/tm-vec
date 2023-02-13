@@ -20,7 +20,7 @@ wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large.npy
 wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large_metadata.npy
 wget https://users.flatironinstitute.org/thamamsy/public_www/cath-domain-seqs-large.fa
 #wget https://users.flatironinstitute.org/thamamsy/public_www/cath-domain-seqs-large.fai
-#wget https://users.flatironinstitute.org/jmorton/public_www/deepblast-public-data/checkpoints/deepblast-l8.ckpt
+wget https://users.flatironinstitute.org/jmorton/public_www/deepblast-public-data/checkpoints/deepblast-l8.ckpt
 
 
 tm_vec_run.py \
