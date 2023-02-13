@@ -27,7 +27,7 @@ python /mnt/home/jmorton/ceph/research/gert/deep_blast_training/collect_env_deta
 
 
 tm_vec_run.py \
-    --query test.fa \
+    --query bagel.fa \
     --tm-vec-model tm_vec_cath_model.ckpt \
     --tm-vec-config tm_vec_cath_model_params.json \
     --database cath_large.npy \
