@@ -33,7 +33,7 @@ parser.add_argument("--database",
 
 parser.add_argument("--database-fasta",
         type=Path,
-        required=True,
+        required=False,
         help="Database that contains the corresponding protein sequences in fasta format."
 )
 
