@@ -229,7 +229,7 @@ if args.deepblast_model is not None:
             y = seq_db[seq_i]
             try :
                 pred_alignment = align_model.align(x, y)
-                # Note : there is an edge case that smith-waterman will throw errors, but
+                # Note : there is an edge case that the aligner will throw errors
                 # needleman-wunsch won't.
                 x_aligned, y_aligned = states2alignment(pred_alignment, x, y)
                 alignments_i.append([x_aligned, pred_alignment, y_aligned])
