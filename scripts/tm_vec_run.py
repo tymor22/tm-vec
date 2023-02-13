@@ -87,10 +87,10 @@ parser.add_argument("--device",
 
 parser.add_argument("--alignment-mode",
                     type=str,
-                    default='smith-waterman',
+                    default='needleman-wunch',
                     required=False,
                     help=(
-                        "`smith-waterman` or `needleman-wunch`"
+                        "`smith-waterman` or `needleman-wunch`."
                     )
 )
 
@@ -130,6 +130,7 @@ if torch.cuda.is_available() and args.device is not None:
     else:
         device = torch.device(f'cuda:{int(args.device)}')
 else:
+    print('Models will be loaded on CPU.')
     device = torch.device('cpu')
 
 if args.protrans_model is None:
@@ -205,6 +206,7 @@ for i in range(I.shape[0]):
 
 near_ids = np.array(near_ids)
 
+del model_deep  # need to clear space for DeepBLAST aligner
 
 #Alignment section
 #If we are also aligning proteins, load tm_vec align and align nearest neighbors if true
@@ -212,7 +214,7 @@ if args.deepblast_model is not None:
     align_model = DeepBLAST.load_from_checkpoint(
         args.deepblast_model, lm=model, tokenizer=tokenizer,
         alignment_mode=args.alignment_mode,  # TODO
-        device=args.device)
+        device=device)
     align_model = align_model.to(device)
     seq_db = Indexer(args.database_fasta, args.database_faidx)
     seq_db.load()
@@ -225,9 +227,14 @@ if args.deepblast_model is not None:
             seq_i = metadata_database[I[i, j]]
 
             y = seq_db[seq_i]
-            pred_alignment = align_model.align(x, y)
-            x_aligned, y_aligned = states2alignment(pred_alignment, x, y)
-            alignments_i.append([x_aligned, pred_alignment, y_aligned])
+            try :
+                pred_alignment = align_model.align(x, y)
+                # Note : there is an edge case that smith-waterman will throw errors, but
+                # needleman-wunsch won't.
+                x_aligned, y_aligned = states2alignment(pred_alignment, x, y)
+                alignments_i.append([x_aligned, pred_alignment, y_aligned])
+            except:
+                alignments_i.append([x, None, y])
 
         alignments.append(alignments_i)
 
