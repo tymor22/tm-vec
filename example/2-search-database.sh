@@ -12,7 +12,6 @@ module load gcc python cuda cudnn
 
 export CUDA_HOME=$CUDA_BASE
 
-python /mnt/home/jmorton/ceph/research/gert/deep_blast_training/collect_env_details.py
 
 
 #wget https://users.flatironinstitute.org/thamamsy/public_www/embeddings_cath_s100_final.npy
