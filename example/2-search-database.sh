@@ -1,5 +1,4 @@
 #!/bin/bash
-#SBATCH --mail-type=ALL         # Mail events (NONE, BEGIN, END, FAIL, ALL)
 # -C a100,ib
 # -p gpu
 # --gpus=1
