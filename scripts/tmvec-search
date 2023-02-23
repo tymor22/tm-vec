@@ -2,9 +2,12 @@
 import numpy as np
 import pandas as pd
 import torch
-from tm_vec.embed_structure_model import trans_basic_block, trans_basic_block_Config
-from tm_vec.tm_vec_utils import featurize_prottrans, embed_tm_vec
+from tm_vec.embed_structure_model import (trans_basic_block,
+                                          trans_basic_block_Config)
+from tm_vec.tm_vec_utils import (featurize_prottrans, embed_tm_vec,
+                                 alignment_strings)
 from tm_vec.fasta import Indexer
+from deepblast.dataset.utils import states2alignment
 from transformers import T5EncoderModel, T5Tokenizer
 import re
 import gc
@@ -17,7 +20,8 @@ from deepblast.trainer import DeepBLAST
 from deepblast.dataset.utils import pack_sequences
 from deepblast.dataset.utils import states2alignment
 
-parser = argparse.ArgumentParser(description='Process TM-Vec arguments', add_help=True)
+parser = argparse.ArgumentParser(
+    description='Process TM-Vec arguments', add_help=True)
 
 parser.add_argument("--query",
         type=Path,
@@ -34,7 +38,8 @@ parser.add_argument("--database",
 parser.add_argument("--database-fasta",
         type=Path,
         required=True,
-        help="Database that contains the corresponding protein sequences in fasta format."
+        help=("Database that contains the corresponding "
+              "protein sequences in fasta format.")
 )
 
 parser.add_argument("--database-faidx",
@@ -100,21 +105,20 @@ parser.add_argument("--k-nearest-neighbors",
         help="Number of nearest neighbhors to return for each query."
 )
 
+parser.add_argument("--output-format",
+                    type=str,
+                    default='tabular',
+                    required=False,
+                    help=(
+                        "Options include `tabular`, `alignment` "
+                        "or `embedding`."
+                    )
+)
 
-parser.add_argument("--path_output_neigbhors",
+parser.add_argument("--output",
         type=Path,
         required=True,
-        help="Nearest neighbor outputs"
-)
-
-parser.add_argument("--path_output_embeddings",
-        type=Path,
-        help="Embeddings for queried sequences"
-)
-
-parser.add_argument("--path_output_alignments",
-        type=Path,
-        help="Alignment output file if alignment is true"
+        help="Outputs"
 )
 
 #Load arguments
@@ -210,7 +214,7 @@ del model_deep  # need to clear space for DeepBLAST aligner
 
 #Alignment section
 #If we are also aligning proteins, load tm_vec align and align nearest neighbors if true
-if args.deepblast_model is not None:
+if args.deepblast_model is not None and args.output_format == 'alignment':
     align_model = DeepBLAST.load_from_checkpoint(
         args.deepblast_model, lm=model, tokenizer=tokenizer,
         alignment_mode=args.alignment_mode,  # TODO
@@ -229,22 +233,29 @@ if args.deepblast_model is not None:
             y = seq_db[seq_i]
             try :
                 pred_alignment = align_model.align(x, y)
-                # Note : there is an edge case that smith-waterman will throw errors, but
-                # needleman-wunsch won't.
+                # Note : there is an edge case that smith-waterman will throw errors,
+                # but needleman-wunsch won't.
                 x_aligned, y_aligned = states2alignment(pred_alignment, x, y)
                 alignments_i.append([x_aligned, pred_alignment, y_aligned])
             except:
                 alignments_i.append([x, None, y])
 
-        alignments.append(alignments_i)
-
-    #Write out the alignments
-    np.save(args.path_output_alignments, np.array(alignments))
+            #Write out the alignments
+            with open(args.output, 'w') as fh:
+                sx, sy = states2alignment(alignments_i)
+                # TODO : not clear how to get the sequence IDS
+                fh.write(sx + '\n')
+                fh.write(sy + '\n')
 
 
 #Outputting results
 #Write out the nearest neighbors (if no database meta data is provided, write out their database indices)
+if args.output_format == 'tabular':
+    nids = pd.Dataframe(near_ids)
+    nids.to_csv(args.output, sep='\t')
+
 if args.metadata is not None:
+
     np.save(args.path_output_neigbhors, near_ids)
 else:
     np.save(args.path_output_neigbhors, I)
