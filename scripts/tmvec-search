@@ -5,7 +5,7 @@ import torch
 from tm_vec.embed_structure_model import (trans_basic_block,
                                           trans_basic_block_Config)
 from tm_vec.tm_vec_utils import (featurize_prottrans, embed_tm_vec,
-                                 alignment_strings)
+                                 format_ids)
 from tm_vec.fasta import Indexer
 from deepblast.dataset.utils import states2alignment
 from transformers import T5EncoderModel, T5Tokenizer
@@ -118,7 +118,14 @@ parser.add_argument("--output-format",
 parser.add_argument("--output",
         type=Path,
         required=True,
-        help="Outputs"
+        help="Output search results."
+)
+
+parser.add_argument("--output-embeddings",
+        type=Path,
+        default=None
+        required=False,
+        help="Output encodings of query proteins."
 )
 
 #Load arguments
@@ -139,10 +146,12 @@ else:
 
 if args.protrans_model is None:
     #Load the ProtTrans model and ProtTrans tokenizer
-    tokenizer = T5Tokenizer.from_pretrained("Rostlab/prot_t5_xl_uniref50", do_lower_case=False )
+    tokenizer = T5Tokenizer.from_pretrained("Rostlab/prot_t5_xl_uniref50",
+                                            do_lower_case=False )
     model = T5EncoderModel.from_pretrained("Rostlab/prot_t5_xl_uniref50")
 else:
-    tokenizer = T5Tokenizer.from_pretrained(args.protrans_model, do_lower_case=False )
+    tokenizer = T5Tokenizer.from_pretrained(args.protrans_model,
+                                            do_lower_case=False )
     model = T5EncoderModel.from_pretrained(args.protrans_model)
 
 gc.collect()
@@ -153,7 +162,8 @@ print("ProtTrans model downloaded")
 
 #Load the Tm_Vec_Align TM model
 tm_vec_model_config = trans_basic_block_Config.from_json(args.tm_vec_config)
-model_deep = trans_basic_block.load_from_checkpoint(args.tm_vec_model, config=tm_vec_model_config)
+model_deep = trans_basic_block.load_from_checkpoint(
+    args.tm_vec_model, config=tm_vec_model_config)
 model_deep = model_deep.to(device)
 model_deep = model_deep.eval()
 print("TM-Vec model loaded")
@@ -212,8 +222,9 @@ near_ids = np.array(near_ids)
 
 del model_deep  # need to clear space for DeepBLAST aligner
 
-#Alignment section
-#If we are also aligning proteins, load tm_vec align and align nearest neighbors if true
+# Alignment section
+# If we are also aligning proteins, load tm_vec align and
+# align nearest neighbors if true
 if args.deepblast_model is not None and args.output_format == 'alignment':
     align_model = DeepBLAST.load_from_checkpoint(
         args.deepblast_model, lm=model, tokenizer=tokenizer,
@@ -242,26 +253,28 @@ if args.deepblast_model is not None and args.output_format == 'alignment':
 
             #Write out the alignments
             with open(args.output, 'w') as fh:
-                sx, sy = states2alignment(alignments_i)
+                if alignments_i[1] is not None:
+                    sx, sy = states2alignment(alignments_i)
+                else:
+                    sx, sy = alignments[0], alignments[2]
                 # TODO : not clear how to get the sequence IDS
-                fh.write(sx + '\n')
-                fh.write(sy + '\n')
+                ix, iy = format_ids(headers[i], seq_i)
+                fh.write(ix + ' ' + sx + '\n')
+                fh.write(iy + ' ' + sy + '\n')
 
 
 #Outputting results
-#Write out the nearest neighbors (if no database meta data is provided, write out their database indices)
+#Write out the nearest neighbors
+# (if no database meta data is providedwrite out their database indices)
 if args.output_format == 'tabular':
-    nids = pd.Dataframe(near_ids)
+    nids = pd.Dataframe(near_ids, index=headers)
+    nids = pd.melt(nids, var_name='query_id', value_name='database_id')
+    tms = pd.DataFrame(D, index=headers)
+    tms = pd.melt(tms, var_name='query_id', value_name='tm-score')
+    nids = pd.concat((nids, tms[['tm-score']]))
     nids.to_csv(args.output, sep='\t')
-
-if args.metadata is not None:
-
-    np.save(args.path_output_neigbhors, near_ids)
-else:
-    np.save(args.path_output_neigbhors, I)
 
 
 #Write out the embeddings
-np.save(args.path_output_embeddings, embed_all_sequences_np)
-
-print("Done")
+if args.output_embeddings is not None:
+    np.save(args.output_embeddings, embed_all_sequences_np)

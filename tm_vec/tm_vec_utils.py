@@ -81,3 +81,19 @@ def query(index, queries, k=10):
     D, I = index.search(queries, k)
 
     return(D, I)
+
+
+def _format_id(ix, iy):
+    """ Assumes that len(ix) > len(iy) """
+    diff = len(ix) - len(iy)
+    ix = ix + ' '
+    iy = iy + ' ' * (diff + 1)
+    return ix, iy
+
+
+def format_ids(ix, iy):
+    if len(ix) > len(iy):
+        ix, iy = _format_id(ix, iy)
+    else:
+        iy, ix = _format_id(iy, ix)
+    return ix, iy
