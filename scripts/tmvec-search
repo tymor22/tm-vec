@@ -123,13 +123,24 @@ parser.add_argument("--output",
 
 parser.add_argument("--output-embeddings",
         type=Path,
-        default=None
+        default=None,
         required=False,
-        help="Output encodings of query proteins."
+        help="Output encodings of query proteins (npy format)."
 )
 
 #Load arguments
 args = parser.parse_args()
+
+#Read in query sequences
+with open(args.query) as handle:
+    headers = []
+    seqs = []
+    for record in SeqIO.parse(handle, "fasta"):
+        headers.append(record.id)
+        seqs.append(str(record.seq))
+
+flat_seqs = [seqs[i] for i in range(len(seqs))]
+print("Sequences inputed")
 
 #Load metadata if it exists
 metadata_database = np.load(args.metadata)
@@ -169,16 +180,6 @@ model_deep = model_deep.eval()
 print("TM-Vec model loaded")
 
 
-#Read in query sequences
-with open(args.query) as handle:
-    headers = []
-    seqs = []
-    for record in SeqIO.parse(handle, "fasta"):
-        headers.append(record.id)
-        seqs.append(str(record.seq))
-
-flat_seqs = [seqs[i] for i in range(len(seqs))]
-print("Sequences inputed")
 
 #Embed all query sequences
 i = 0
@@ -235,44 +236,39 @@ if args.deepblast_model is not None and args.output_format == 'alignment':
     seq_db.load()
 
     alignments = []
-    for i in range(I.shape[0]):
-        alignments_i = []
-        for j in range(I.shape[1]):
-            x = flat_seqs[i]
-            seq_i = metadata_database[I[i, j]]
-
-            y = seq_db[seq_i]
-            try :
-                pred_alignment = align_model.align(x, y)
-                # Note : there is an edge case that smith-waterman will throw errors,
-                # but needleman-wunsch won't.
-                x_aligned, y_aligned = states2alignment(pred_alignment, x, y)
-                alignments_i.append([x_aligned, pred_alignment, y_aligned])
-            except:
-                alignments_i.append([x, None, y])
-
-            #Write out the alignments
-            with open(args.output, 'w') as fh:
-                if alignments_i[1] is not None:
-                    sx, sy = states2alignment(alignments_i)
-                else:
-                    sx, sy = alignments[0], alignments[2]
-                # TODO : not clear how to get the sequence IDS
-                ix, iy = format_ids(headers[i], seq_i)
-                fh.write(ix + ' ' + sx + '\n')
-                fh.write(iy + ' ' + sy + '\n')
+    with open(args.output, 'w') as fh:
+        for i in range(I.shape[0]):
+            for j in range(I.shape[1]):
+                x = flat_seqs[i]
+                seq_i = metadata_database[I[i, j]]
+                y = seq_db[seq_i]
+                try :
+                    pred_alignment = align_model.align(x, y)
+                    # Note : there is an edge case that smith-waterman will throw errors,
+                    # but needleman-wunsch won't.
+                    x_aligned, y_aligned = states2alignment(pred_alignment, x, y)
+                    alignments_i = [x_aligned, pred_alignment, y_aligned]
+                    #Write out the alignments
+                    x, s, y = alignments_i
+                    # TODO : not clear how to get the sequence IDS
+                    ix, iy = format_ids(headers[i], seq_i)
+                    fh.write(ix + ' ' + x + '\n')
+                    fh.write(iy + ' ' + y + '\n\n')
+                except:
+                    print(f'No valid alignments found for {headers[i]} {seq_i}')
 
 
 #Outputting results
 #Write out the nearest neighbors
 # (if no database meta data is providedwrite out their database indices)
 if args.output_format == 'tabular':
-    nids = pd.Dataframe(near_ids, index=headers)
-    nids = pd.melt(nids, var_name='query_id', value_name='database_id')
+    nids = pd.DataFrame(near_ids, index=headers)
+    nids.index.name = 'query_id'
+    nids = pd.melt(nids.reset_index(), id_vars='query_id', var_name='rank', value_name='database_id')
     tms = pd.DataFrame(D, index=headers)
     tms = pd.melt(tms, var_name='query_id', value_name='tm-score')
-    nids = pd.concat((nids, tms[['tm-score']]))
-    nids.to_csv(args.output, sep='\t')
+    nids = pd.concat((nids, tms[['tm-score']]), axis=1)
+    nids.to_csv(args.output, sep='\t', index=None)
 
 
 #Write out the embeddings

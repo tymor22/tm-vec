@@ -26,7 +26,22 @@ python /mnt/home/jmorton/ceph/research/gert/deep_blast_training/collect_env_deta
 #wget https://users.flatironinstitute.org/jmorton/public_www/deepblast-public-data/checkpoints/deepblast-l8.ckpt
 
 
-tm_vec_run.py \
+# tmvec-search \
+#     --query test.fa \
+#     --tm-vec-model tm_vec_cath_model.ckpt \
+#     --tm-vec-config tm_vec_cath_model_params.json \
+#     --database cath_large.npy \
+#     --metadata cath_large_metadata.npy \
+#     --database-fasta cath-domain-seqs-large.fa \
+#     --database-faidx cath-domain-seqs-large.fai \
+#     --protrans-model ~/ceph/prot_t5_xl_uniref50 \
+#     --deepblast-model deepblast-l8.ckpt \
+#     --device 'gpu' \
+#     --output-format alignment \
+#     --output alignments.txt \
+#     --output-embeddings test.npy
+
+tmvec-search \
     --query test.fa \
     --tm-vec-model tm_vec_cath_model.ckpt \
     --tm-vec-config tm_vec_cath_model_params.json \
@@ -37,6 +52,6 @@ tm_vec_run.py \
     --protrans-model ~/ceph/prot_t5_xl_uniref50 \
     --deepblast-model deepblast-l8.ckpt \
     --device 'gpu' \
-    --path_output_neigbhors neighbors.npy \
-    --path_output_embeddings embeddings.npy \
-    --path_output_alignments alignments.npy
+    --output-format tabular \
+    --output tabular.txt \
+    --output-embeddings test.npy
