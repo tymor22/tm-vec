@@ -268,6 +268,7 @@ if args.output_format == 'tabular':
     tms = pd.DataFrame(D, index=headers)
     tms = pd.melt(tms, var_name='query_id', value_name='tm-score')
     nids = pd.concat((nids, tms[['tm-score']]), axis=1)
+    nids = nids.sort_values(['query_id', 'rank'])
     nids.to_csv(args.output, sep='\t', index=None)
 
 
