@@ -1,5 +1,5 @@
-#wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model.ckpt
-#wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model_params.json
+wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model.ckpt
+wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model_params.json
 
 
 tmvec-build-database \
@@ -7,3 +7,7 @@ tmvec-build-database \
     --tm-vec-model tm_vec_cath_model.ckpt \
     --tm-vec-config-path tm_vec_cath_model_params.json \
     --output bagel_database
+
+build-fasta-index \
+    --fasta bagel.fa \
+    --faidx bagel.fai
