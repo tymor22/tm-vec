@@ -13,17 +13,34 @@ module load gcc python cuda cudnn
 export CUDA_HOME=$CUDA_BASE
 
 
-
 wget https://users.flatironinstitute.org/thamamsy/public_www/embeddings_cath_s100_final.npy
 wget https://users.flatironinstitute.org/thamamsy/public_www/embeddings_cath_s100_w_metadata.tsv
+wget https://users.flatironinstitute.org/jmorton/public_www/deepblast-public-data/checkpoints/deepblast-l8.ckpt
 wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large.npy
 wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large_metadata.npy
 wget https://users.flatironinstitute.org/thamamsy/public_www/cath-domain-seqs-large.fa
-#wget https://users.flatironinstitute.org/thamamsy/public_www/cath-domain-seqs-large.fai
+wget https://users.flatironinstitute.org/thamamsy/public_www/cath-domain-seqs-large.fai
 wget https://users.flatironinstitute.org/jmorton/public_www/deepblast-public-data/checkpoints/deepblast-l8.ckpt
 
 
-tm_vec_run.py \
+# output alignment format
+tmvec-search \
+    --query bagel.fa \
+    --tm-vec-model tm_vec_cath_model.ckpt \
+    --tm-vec-config tm_vec_cath_model_params.json \
+    --database bagel_database/db.npy \
+    --metadata bagel_database/meta.npy \
+    --database-fasta bagel.fa \
+    --database-faidx bagel.fai \
+    --protrans-model ~/ceph/prot_t5_xl_uniref50 \
+    --deepblast-model deepblast-l8.ckpt \
+    --device 'gpu' \
+    --output-format alignment \
+    --output alignments.txt \
+    --output-embeddings test.npy
+
+# output tabular format
+tmvec-search \
     --query bagel.fa \
     --tm-vec-model tm_vec_cath_model.ckpt \
     --tm-vec-config tm_vec_cath_model_params.json \
@@ -34,6 +51,6 @@ tm_vec_run.py \
     --protrans-model ~/ceph/prot_t5_xl_uniref50 \
     --deepblast-model deepblast-l8.ckpt \
     --device 'gpu' \
-    --path_output_neigbhors neighbors.npy \
-    --path_output_embeddings embeddings.npy \
-    --path_output_alignments alignments.npy
+    --output-format tabular \
+    --output tabular.txt \
+    --output-embeddings test.npy

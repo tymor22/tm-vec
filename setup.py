@@ -42,7 +42,11 @@ setup(name='tm-vec',
           'transformers',
           'SentencePiece',
       ],
-      scripts=glob('scripts/*'),
+      scripts=[
+          'scripts/build-fasta-index',
+          'scripts/tmvec-build-database',
+          'scripts/tmvec-search',
+      ],
       classifiers=classifiers,
       package_data={
       })
