@@ -43,6 +43,21 @@ wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model.c
 
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_cath_model_params.json
 
+# Databases
+
+We have embedded several sequence databases that users can search against. We have included embeddings for all CATH domains and SWISS-PROT sequences here. See the search tutorials or the scripts folder for how to run searches against these databases. Metadata for these sequences is position indexed. The embeddings and metadata are stored as numpy array (npy format) which can loaded as follows: np.load(file_path, allow_pickle=True).
+
+Download the embeddings and metadata for CATH domains (the model that you should query with is tm_vec_cath_model_large)
+
+wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large.npy
+
+wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large_metadata.npy
+
+Download the embeddings and metadata for SWISS-PROT chains (the model that you should query with here is tm_vec_swiss_model_large)
+
+wget https://users.flatironinstitute.org/thamamsy/public_www/swiss_large.npy
+
+wget https://users.flatironinstitute.org/thamamsy/public_www/swiss_large_metadata.npy
 
 
 # Run TM-Vec + DeepBLAST from the command line
@@ -53,7 +68,7 @@ Arguments for running TM-Vec search + DeepBLAST alignments from the command line
 - There are several database parameters the user needs to provide at the command line, including the lookup database that will be queried (TM-Vec embeddings database), the lookup database's metadata, and the lookup database's sequences (relevant for alignments). 
 - There are several model parameters to provide at the command line. These include the weights for the TM-Vec model that will embed the user’s query sequences (note that this model should be the same model as the model used to make the lookup embedding database- i.e. TM-Vec CATH model or TM-Vec SWISS-MODEL model.), the config file for the TM-Vec model, and the DeepBLAST alignment model that will run alignments. 
 
-
+```
 Example run:
 scripts/tm_vec_run.py --input_data --k_nearest_neighbors --align --path_output_neigbhors --path_output_embeddings --path_output_alignments --database --metadata --database_sequences --tm_vec_model_path --tm_vec_config_path --tm_vec_align_path
 
@@ -104,7 +119,7 @@ DeepBLAST model:
 
 —tm_vec_align_path
 “Align model path”
-
+```
 
 
 

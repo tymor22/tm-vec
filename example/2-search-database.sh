@@ -1,6 +1,4 @@
 #!/bin/bash
-#SBATCH --mail-type=ALL         # Mail events (NONE, BEGIN, END, FAIL, ALL)
-#SBATCH --mail-user=jmorton@flatironinstitute.org
 # -C a100,ib
 # -p gpu
 # --gpus=1
@@ -14,16 +12,20 @@ module load gcc python cuda cudnn
 
 export CUDA_HOME=$CUDA_BASE
 
-python /mnt/home/jmorton/ceph/research/gert/deep_blast_training/collect_env_details.py
-
 
 wget https://users.flatironinstitute.org/thamamsy/public_www/embeddings_cath_s100_final.npy
 wget https://users.flatironinstitute.org/thamamsy/public_www/embeddings_cath_s100_w_metadata.tsv
 wget https://users.flatironinstitute.org/jmorton/public_www/deepblast-public-data/checkpoints/deepblast-l8.ckpt
+wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large.npy
+wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large_metadata.npy
+wget https://users.flatironinstitute.org/thamamsy/public_www/cath-domain-seqs-large.fa
+wget https://users.flatironinstitute.org/thamamsy/public_www/cath-domain-seqs-large.fai
+wget https://users.flatironinstitute.org/jmorton/public_www/deepblast-public-data/checkpoints/deepblast-l8.ckpt
 
 
+# output alignment format
 tmvec-search \
-    --query test.fa \
+    --query bagel.fa \
     --tm-vec-model tm_vec_cath_model.ckpt \
     --tm-vec-config tm_vec_cath_model_params.json \
     --database bagel_database/db.npy \
@@ -37,8 +39,9 @@ tmvec-search \
     --output alignments.txt \
     --output-embeddings test.npy
 
+# output tabular format
 tmvec-search \
-    --query test.fa \
+    --query bagel.fa \
     --tm-vec-model tm_vec_cath_model.ckpt \
     --tm-vec-config tm_vec_cath_model_params.json \
     --database cath_large.npy \
