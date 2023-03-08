@@ -70,5 +70,5 @@ wget https://users.flatironinstitute.org/thamamsy/public_www/swiss_large_metadat
 
 # Run TM-Vec + DeepBLAST from the command line
 
-See the DeepBLAST wiki on how to [build TM-vec databases](https://github.com/flatironinstitute/deepblast/wiki/Building-the-TMvec-search-database) and search against [TM-vec databbases](https://github.com/flatironinstitute/deepblast/wiki/Searching-proteins)
+See the DeepBLAST wiki on how to [build TM-vec databases](https://github.com/flatironinstitute/deepblast/wiki/Building-the-TMvec-search-database) and search against [TM-vec datab ases](https://github.com/flatironinstitute/deepblast/wiki/Searching-proteins)
 
