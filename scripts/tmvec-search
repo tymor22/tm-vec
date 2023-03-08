@@ -37,14 +37,9 @@ parser.add_argument("--database",
 
 parser.add_argument("--database-fasta",
         type=Path,
-<<<<<<< HEAD:scripts/tmvec-search
         required=True,
         help=("Database that contains the corresponding "
               "protein sequences in fasta format.")
-=======
-        required=False,
-        help="Database that contains the corresponding protein sequences in fasta format."
->>>>>>> a7dade0454d0974df72f584b423482b090f62ea7:scripts/tm_vec_run.py
 )
 
 parser.add_argument("--database-faidx",
@@ -241,7 +236,6 @@ if args.deepblast_model is not None and args.output_format == 'alignment':
     seq_db.load()
 
     alignments = []
-<<<<<<< HEAD:scripts/tmvec-search
     with open(args.output, 'w') as fh:
         for i in range(I.shape[0]):
             for j in range(I.shape[1]):
@@ -262,27 +256,6 @@ if args.deepblast_model is not None and args.output_format == 'alignment':
                     fh.write(iy + ' ' + y + '\n\n')
                 except:
                     print(f'No valid alignments found for {headers[i]} {seq_i}')
-=======
-    for i in range(I.shape[0]):
-        alignments_i = []
-        for j in range(I.shape[1]):
-            x = flat_seqs[i]
-            seq_i = metadata_database[I[i, j]]
-
-            y = seq_db[seq_i]
-            try :
-                pred_alignment = align_model.align(x, y)
-                # Note : there is an edge case that the aligner will throw errors
-                x_aligned, y_aligned = states2alignment(pred_alignment, x, y)
-                alignments_i.append([x_aligned, pred_alignment, y_aligned])
-            except:
-                alignments_i.append([x, None, y])
-
-        alignments.append(alignments_i)
-
-    #Write out the alignments
-    np.save(args.path_output_alignments, np.array(alignments))
->>>>>>> a7dade0454d0974df72f584b423482b090f62ea7:scripts/tm_vec_run.py
 
 
 #Outputting results
