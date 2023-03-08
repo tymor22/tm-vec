@@ -70,9 +70,5 @@ wget https://users.flatironinstitute.org/thamamsy/public_www/swiss_large_metadat
 
 # Run TM-Vec + DeepBLAST from the command line
 
-Arguments for running TM-Vec search + DeepBLAST alignments from the command line. Python script is located here: scripts/tm_vec_run.py.
-
-- There are several parameters that the user must provide, including the data to query (in Fasta format), the number of nearest neighbors to return (I️.e. Top N), and the option to perform alignments using DeepBLAST (True or False).  Additionally, the user should provide output paths for where output files should go. These include output paths for the nearest neighbor outputs, the embeddings for the queried sequences, and for alignment outputs (if alignments were done). Outputs (nearest neighbors, embeddings, alignments) will be written in numpy files (npy). 
-- There are several database parameters the user needs to provide at the command line, including the lookup database that will be queried (TM-Vec embeddings database), the lookup database's metadata, and the lookup database's sequences (relevant for alignments). 
-- There are several model parameters to provide at the command line. These include the weights for the TM-Vec model that will embed the user’s query sequences (note that this model should be the same model as the model used to make the lookup embedding database- i.e. TM-Vec CATH model or TM-Vec SWISS-MODEL model.), the config file for the TM-Vec model, and the DeepBLAST alignment model that will run alignments. 
+See the DeepBLAST wiki on how to [build TM-vec databases](https://github.com/flatironinstitute/deepblast/wiki/Building-the-TMvec-search-database) and search against [TM-vec databbases](https://github.com/flatironinstitute/deepblast/wiki/Searching-proteins)
 
