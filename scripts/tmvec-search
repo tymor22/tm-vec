@@ -2,10 +2,11 @@
 import numpy as np
 import pandas as pd
 import torch
+import time
 from tm_vec.embed_structure_model import (trans_basic_block,
                                           trans_basic_block_Config)
 from tm_vec.tm_vec_utils import (featurize_prottrans, embed_tm_vec,
-                                 format_ids)
+                                 format_ids, encode, load_database, query)
 from tm_vec.fasta import Indexer
 from deepblast.dataset.utils import states2alignment
 from transformers import T5EncoderModel, T5Tokenizer
@@ -181,34 +182,19 @@ print("TM-Vec model loaded")
 
 
 
-#Embed all query sequences
-i = 0
-embed_all_sequences= []
-while i < len(flat_seqs):
-    seq = flat_seqs[i:i+1]
-    protrans_sequence = featurize_prottrans(seq, model, tokenizer, device)
-    embed_sequence = embed_tm_vec(protrans_sequence, model_deep, device)
-    embed_all_sequences.append(embed_sequence)
-    i = i + 1
-
 #Read in query database
 query_database = np.load(args.database)
 
+#Embed all query sequences
 #Build query array and save the embeddings (will write them to output)
-embed_all_sequences_np = np.concatenate(embed_all_sequences, axis=0)
-queries = embed_all_sequences_np.copy()
-#Normalize queries
-faiss.normalize_L2(queries)
+queries = encode(flat_seqs, model_deep, model, tokenizer, device)
 
 #Build an indexed database
-d = query_database.shape[1]
-index = faiss.IndexFlatIP(d)
-faiss.normalize_L2(query_database)
-index.add(query_database)
+index = load_database(args.database)
 
 #Return the nearest neighbors
 k = args.k_nearest_neighbors
-D, I = index.search(queries, k)
+D, I = query(index, queries, k)
 
 #Return the metadata for the nearest neighbor results
 near_ids = []
@@ -238,6 +224,7 @@ if args.deepblast_model is not None and args.output_format == 'alignment':
     alignments = []
     with open(args.output, 'w') as fh:
         for i in range(I.shape[0]):
+            print(i)
             for j in range(I.shape[1]):
                 x = flat_seqs[i]
                 seq_i = metadata_database[I[i, j]]
@@ -274,4 +261,4 @@ if args.output_format == 'tabular':
 
 #Write out the embeddings
 if args.output_embeddings is not None:
-    np.save(args.output_embeddings, embed_all_sequences_np)
+    np.save(args.output_embeddings, queries)
