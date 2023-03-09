@@ -43,10 +43,10 @@ tmvec-search \
     --query bagel.fa \
     --tm-vec-model tm_vec_cath_model.ckpt \
     --tm-vec-config tm_vec_cath_model_params.json \
-    --database cath_large.npy \
-    --metadata cath_large_metadata.npy \
-    --database-fasta cath-domain-seqs-large.fa \
-    --database-faidx cath-domain-seqs-large.fai \
+    --database bagel_database/db.npy \
+    --metadata bagel_database/meta.npy \
+    --database-fasta bagel.fa \
+    --database-faidx bagel.fai \
     --device 'gpu' \
     --output-format tabular \
     --output tabular.txt \
