@@ -16,9 +16,7 @@ import faiss
 from pathlib import Path
 import argparse
 import pickle
-from deepblast.trainer import DeepBLAST
-from deepblast.dataset.utils import pack_sequences
-from deepblast.dataset.utils import states2alignment
+
 
 parser = argparse.ArgumentParser(
     description='Process TM-Vec arguments', add_help=True)
@@ -92,7 +90,7 @@ parser.add_argument("--device",
 
 parser.add_argument("--alignment-mode",
                     type=str,
-                    default='needleman-wunch',
+                    default='needleman-wunsch',
                     required=False,
                     help=(
                         "`smith-waterman` or `needleman-wunch`."
@@ -212,10 +210,17 @@ del model_deep  # need to clear space for DeepBLAST aligner
 # If we are also aligning proteins, load tm_vec align and
 # align nearest neighbors if true
 if args.deepblast_model is not None and args.output_format == 'alignment':
-    align_model = DeepBLAST.load_from_checkpoint(
+    # moving imports here because it may take a very long time
+    from deepblast.trainer import DeepBLAST
+    from deepblast.dataset.utils import pack_sequences
+    from deepblast.dataset.utils import states2alignment
+    from deepblast.utils import load_model
+
+    align_model = load_model(
         args.deepblast_model, lm=model, tokenizer=tokenizer,
-        alignment_mode=args.alignment_mode,  # TODO
+        alignment_mode=args.alignment_mode,
         device=device)
+
     align_model = align_model.to(device)
     seq_db = Indexer(args.database_fasta, args.database_faidx)
     seq_db.load()
