@@ -15,12 +15,11 @@ export CUDA_HOME=$CUDA_BASE
 
 wget https://users.flatironinstitute.org/thamamsy/public_www/embeddings_cath_s100_final.npy
 wget https://users.flatironinstitute.org/thamamsy/public_www/embeddings_cath_s100_w_metadata.tsv
-wget https://users.flatironinstitute.org/jmorton/public_www/deepblast-public-data/checkpoints/deepblast-l8.ckpt
 wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large.npy
 wget https://users.flatironinstitute.org/thamamsy/public_www/cath_large_metadata.npy
 wget https://users.flatironinstitute.org/thamamsy/public_www/cath-domain-seqs-large.fa
 wget https://users.flatironinstitute.org/thamamsy/public_www/cath-domain-seqs-large.fai
-wget https://users.flatironinstitute.org/jmorton/public_www/deepblast-public-data/checkpoints/deepblast-l8.ckpt
+wget https://users.flatironinstitute.org/jmorton/public_www/deepblast-public-data/checkpoints/deepblast-pt-l8.ckpt
 
 
 # output alignment format
@@ -32,9 +31,9 @@ tmvec-search \
     --metadata bagel_database/meta.npy \
     --database-fasta bagel.fa \
     --database-faidx bagel.fai \
-    --protrans-model ~/ceph/prot_t5_xl_uniref50 \
-    --deepblast-model deepblast-l8.ckpt \
+    --deepblast-model deepblast-pt-l8.ckpt \
     --device 'gpu' \
+    --k-nearest-neighbors 1 \
     --output-format alignment \
     --output alignments.txt \
     --output-embeddings test.npy
@@ -48,8 +47,6 @@ tmvec-search \
     --metadata cath_large_metadata.npy \
     --database-fasta cath-domain-seqs-large.fa \
     --database-faidx cath-domain-seqs-large.fai \
-    --protrans-model ~/ceph/prot_t5_xl_uniref50 \
-    --deepblast-model deepblast-l8.ckpt \
     --device 'gpu' \
     --output-format tabular \
     --output tabular.txt \
