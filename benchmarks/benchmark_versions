@@ -1,0 +1,17 @@
+
+All of the structural alignments analyzed were provided from the original benchmarks 
+(MALIDUP:https://pubmed.ncbi.nlm.nih.gov/17932926/, MALISAM: https://pubmed.ncbi.nlm.nih.gov/17855399/).
+
+Structural encoding comparison was done using this repository:
+https://github.com/djberenberg/structure-encoding
+
+
+DIAMOND benchmarking: DIAMOND v2.0.14
+MMseqs2 benchmarking: MMseqs2 Release 14-7e284
+Foldseek benchmnarking: (Foldseek 3-915ef7d)
+HHBlits benchmarking: downloaded from HH-suite3 (3.3.0)
+ProtTucker (release date of DBs: 16.11.2021)
+
+ESMFold: ESM-2 Public Release v1.0.3
+OmegaFold: OmegaFold v1.1.0
+
