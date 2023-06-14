@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+import numpy as np
+import pandas as pd
+import torch
+from tm_vec.embed_structure_model import (trans_basic_block,
+                                          trans_basic_block_Config)
+from tm_vec.tm_vec_utils import (featurize_prottrans, embed_tm_vec,
+                                 format_ids, encode_gen, load_database, query,
+                                 save_embeds)
+from tm_vec.fasta import Indexer
+from deepblast.dataset.utils import states2alignment
+from transformers import T5EncoderModel, T5Tokenizer
+import re
+import gc
+from Bio import SeqIO
+import faiss
+from pathlib import Path
+import argparse
+import pickle
+
+
+parser = argparse.ArgumentParser(
+    description='Process TM-Vec arguments', add_help=True)
+
+parser.add_argument("--query",
+        type=Path,
+        required=True,
+        help="Input fasta-formatted data to query against database."
+)
+
+parser.add_argument("--tm-vec-model",
+        type=Path,
+        required=True,
+        help="Model path for embedding"
+)
+
+parser.add_argument("--tm-vec-config",
+        type=Path,
+        required=True,
+        help="Config path for embedding"
+)
+
+
+parser.add_argument("--protrans-model",
+                    type=Path,
+                    default=None,
+                    required=False,
+                    help=("Model path for the ProTrans embedding model. "
+                          "If this is not specified, then the model will "
+                          "automatically be downloaded.")
+)
+parser.add_argument("--device",
+                    type=str,
+                    default=None,
+                    required=False,
+                    help=(
+                        "The device id to load the model onto. "
+                        "This will specify whether or not a GPU "
+                        "will be utilized.  If `gpu` is specified ",
+                        "then the first gpu device will be used."
+                    )
+)
+
+
+parser.add_argument("--output-embeddings",
+        type=Path,
+        default=None,
+        required=True,
+        help="Output encodings of query proteins (npy format)."
+)
+
+#Load arguments
+args = parser.parse_args()
+
+#Read in query sequences
+with open(args.query) as handle:
+    headers = []
+    seqs = []
+    for record in SeqIO.parse(handle, "fasta"):
+        headers.append(record.id)
+        seqs.append(str(record.seq))
+
+flat_seqs = [seqs[i] for i in range(len(seqs))]
+print("Sequences inputed")
+
+#Load metadata if it exists
+metadata_database = np.load(args.metadata)
+
+#Set device
+if torch.cuda.is_available() and args.device is not None:
+    if args.device == 'gpu':
+        device = torch.device(f'cuda:0')
+    else:
+        device = torch.device(f'cuda:{int(args.device)}')
+else:
+    print('Models will be loaded on CPU.')
+    device = torch.device('cpu')
+
+if args.protrans_model is None:
+    #Load the ProtTrans model and ProtTrans tokenizer
+    tokenizer = T5Tokenizer.from_pretrained("Rostlab/prot_t5_xl_uniref50",
+                                            do_lower_case=False )
+    model = T5EncoderModel.from_pretrained("Rostlab/prot_t5_xl_uniref50")
+else:
+    tokenizer = T5Tokenizer.from_pretrained(args.protrans_model,
+                                            do_lower_case=False )
+    model = T5EncoderModel.from_pretrained(args.protrans_model)
+
+gc.collect()
+model = model.to(device)
+model = model.eval()
+print("ProtTrans model downloaded")
+
+
+#Load the Tm_Vec_Align TM model
+tm_vec_model_config = trans_basic_block_Config.from_json(args.tm_vec_config)
+model_deep = trans_basic_block.load_from_checkpoint(
+    args.tm_vec_model, config=tm_vec_model_config)
+model_deep = model_deep.to(device)
+model_deep = model_deep.eval()
+print("TM-Vec model loaded")
+
+
+#Embed all query sequences
+#Build query array and save the embeddings (will write them to output)
+queries = encode_gen(flat_seqs, model_deep, model, tokenizer, device)
+
+#Write out the embeddings
+save_embeds(headers, queries, args.output_embeddings)

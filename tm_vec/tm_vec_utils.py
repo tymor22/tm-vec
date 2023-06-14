@@ -65,6 +65,22 @@ def encode(sequences, model_deep, model, tokenizer, device):
     return np.concatenate(embed_all_sequences, axis=0)
 
 
+def encode_gen(sequences, model_deep, model, tokenizer, device):
+    i = 0
+    embed_all_sequences=[]
+    while i < len(sequences):
+        protrans_sequence = featurize_prottrans(sequences[i:i+1], model, tokenizer, device)
+        embedded_sequence = embed_tm_vec(protrans_sequence, model_deep, device)
+        i = i + 1
+        yield embedded_sequence
+
+
+def save_embeds(names, embeds, file_name):
+    with open(file_name, 'wb') as file:
+        for name, seq_embed in enumerate(zip(names, embeds)):
+            np.savez(file, **{name: seq_embed}, allow_pickle=False)
+
+
 def load_database(path):
     lookup_database = np.load(path)
     #Build an indexed database
