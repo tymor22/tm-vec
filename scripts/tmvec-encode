@@ -83,8 +83,6 @@ with open(args.query) as handle:
 flat_seqs = [seqs[i] for i in range(len(seqs))]
 print("Sequences inputed")
 
-#Load metadata if it exists
-metadata_database = np.load(args.metadata)
 
 #Set device
 if torch.cuda.is_available() and args.device is not None:
