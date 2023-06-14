@@ -78,7 +78,7 @@ def encode_gen(sequences, model_deep, model, tokenizer, device):
 def save_embeds(names, embeds, file_name):
     with open(file_name, 'wb') as file:
         for name, seq_embed in enumerate(zip(names, embeds)):
-            np.savez(file, **{name: seq_embed}, allow_pickle=False)
+            np.savez(file, **{str(name): seq_embed}, allow_pickle=False)
 
 
 def load_database(path):
