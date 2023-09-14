@@ -88,6 +88,12 @@ parser.add_argument("--device",
                     )
 )
 
+parser.add_argument("--threads",
+                    type=int,
+                    default=1,
+                    required=False,
+                    help="Number of threads to use for parallel processing.")
+
 parser.add_argument("--alignment-mode",
                     type=str,
                     default='needleman-wunsch',
@@ -166,13 +172,19 @@ else:
 gc.collect()
 model = model.to(device)
 model = model.eval()
+
+# set threads
+torch.set_num_threads(args.threads)
+
 print("ProtTrans model downloaded")
 
 
 #Load the Tm_Vec_Align TM model
 tm_vec_model_config = trans_basic_block_Config.from_json(args.tm_vec_config)
 model_deep = trans_basic_block.load_from_checkpoint(
-    args.tm_vec_model, config=tm_vec_model_config)
+    args.tm_vec_model, config=tm_vec_model_config,
+    map_location=device)
+
 model_deep = model_deep.to(device)
 model_deep = model_deep.eval()
 print("TM-Vec model loaded")
