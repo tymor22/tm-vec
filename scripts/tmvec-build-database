@@ -59,6 +59,12 @@ parser.add_argument("--output",
                     help="Output path for the database files"
 )
 
+parser.add_argument("--threads",
+                    type=int,
+                    default=1,
+                    required=False,
+                    help="Number of threads to use for parallel processing.")
+
 #Load arguments
 args = parser.parse_args()
 
@@ -84,6 +90,8 @@ model = model.to(device)
 model = model.eval()
 print("ProtTrans model downloaded")
 
+# set up threads
+torch.set_num_threads(args.threads)
 
 #Load the Tm_Vec_Align TM model
 tm_vec_model_config = trans_basic_block_Config.from_json(args.tm_vec_config_path)
