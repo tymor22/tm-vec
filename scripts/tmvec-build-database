@@ -49,7 +49,7 @@ parser.add_argument("--device",
                     help=(
                         "The device id to load the model onto. "
                         "This will specify whether or not a GPU "
-                        "will be utilized.  If `gpu` is specified ",
+                        "will be utilized.  If `gpu` is specified "
                         "then the first gpu device will be used."
                     )
 )
