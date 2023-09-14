@@ -65,10 +65,10 @@ parser.add_argument("--threads",
                     required=False,
                     help="Number of threads to use for parallel processing.")
 
-#Load arguments
+# Load arguments
 args = parser.parse_args()
 
-#Set device
+# Set device
 if torch.cuda.is_available() and args.device is not None:
     if args.device == 'gpu':
         device = torch.device(f'cuda:0')
@@ -78,7 +78,7 @@ else:
     device = torch.device('cpu')
 
 if args.protrans_model is None:
-    #Load the ProtTrans model and ProtTrans tokenizer
+    # Load the ProtTrans model and ProtTrans tokenizer
     tokenizer = T5Tokenizer.from_pretrained("Rostlab/prot_t5_xl_uniref50", do_lower_case=False )
     model = T5EncoderModel.from_pretrained("Rostlab/prot_t5_xl_uniref50")
 else:
@@ -93,7 +93,7 @@ print("ProtTrans model downloaded")
 # set up threads
 torch.set_num_threads(args.threads)
 
-#Load the Tm_Vec_Align TM model
+# Load the Tm_Vec_Align TM model
 tm_vec_model_config = trans_basic_block_Config.from_json(args.tm_vec_config_path)
 model_deep = trans_basic_block.load_from_checkpoint(args.tm_vec_model,
                                                     config=tm_vec_model_config,
@@ -103,7 +103,7 @@ model_deep = model_deep.eval()
 print("TM-Vec model loaded")
 
 
-#Read in query sequences
+# Read in query sequences
 with open(args.input_fasta) as handle:
     headers = []
     seqs = []
@@ -114,17 +114,17 @@ with open(args.input_fasta) as handle:
 flat_seqs = [seqs[i] for i in range(len(seqs))]
 print("Sequences loaded.")
 
-#Embed all query sequences
+# Embed all query sequences
 encoded_database = encode(flat_seqs, model_deep, model, tokenizer, device)
 
-#Metadata array
+# Metadata array
 metdata = np.array(headers)
 
-#Outputting results
+# Outputting results
 os.mkdir(args.output)
 path_output_database = os.path.join(args.output, 'db')
 path_output_metadata = os.path.join(args.output, 'meta')
-#Write out the embeddings
+# Write out the embeddings
 np.save(path_output_database, encoded_database)
-#Write out metdata
+# Write out metdata
 np.save(path_output_metadata, metdata)
