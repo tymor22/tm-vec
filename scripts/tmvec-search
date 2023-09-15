@@ -4,18 +4,13 @@ import pandas as pd
 import torch
 from tm_vec.embed_structure_model import (trans_basic_block,
                                           trans_basic_block_Config)
-from tm_vec.tm_vec_utils import (featurize_prottrans, embed_tm_vec,
-                                 format_ids, encode, load_database, query)
-from tm_vec.fasta import Indexer
+from tm_vec.tm_vec_utils import (format_ids, encode, load_database, query)
 from deepblast.dataset.utils import states2alignment
 from transformers import T5EncoderModel, T5Tokenizer
-import re
 import gc
-from Bio import SeqIO
-import faiss
 from pathlib import Path
 import argparse
-import pickle
+from pysam.libcfaidx import FastxFile, FastaFile
 
 
 parser = argparse.ArgumentParser(
@@ -38,12 +33,6 @@ parser.add_argument("--database-fasta",
         required=False,
         help=("Database that contains the corresponding "
               "protein sequences in fasta format.")
-)
-
-parser.add_argument("--database-faidx",
-        type=Path,
-        required=False,
-        help="Fasta index for database fasta format."
 )
 
 parser.add_argument("--metadata",
@@ -135,21 +124,21 @@ parser.add_argument("--output-embeddings",
 #Load arguments
 args = parser.parse_args()
 
-#Read in query sequences
-with open(args.query) as handle:
+# Read in query sequences
+with FastxFile(args.query) as query_fasta:
     headers = []
     seqs = []
-    for record in SeqIO.parse(handle, "fasta"):
-        headers.append(record.id)
-        seqs.append(str(record.seq))
+    for record in query_fasta:
+        headers.append(record.name)
+        seqs.append(str(record.sequence))
 
 flat_seqs = [seqs[i] for i in range(len(seqs))]
 print("Sequences inputed")
 
-#Load metadata if it exists
+# Load metadata if it exists
 metadata_database = np.load(args.metadata)
 
-#Set device
+# Set device
 if torch.cuda.is_available() and args.device is not None:
     if args.device == 'gpu':
         device = torch.device(f'cuda:0')
@@ -160,13 +149,13 @@ else:
     device = torch.device('cpu')
 
 if args.protrans_model is None:
-    #Load the ProtTrans model and ProtTrans tokenizer
+    # Load the ProtTrans model and ProtTrans tokenizer
     tokenizer = T5Tokenizer.from_pretrained("Rostlab/prot_t5_xl_uniref50",
-                                            do_lower_case=False )
+                                            do_lower_case=False)
     model = T5EncoderModel.from_pretrained("Rostlab/prot_t5_xl_uniref50")
 else:
     tokenizer = T5Tokenizer.from_pretrained(args.protrans_model,
-                                            do_lower_case=False )
+                                            do_lower_case=False)
     model = T5EncoderModel.from_pretrained(args.protrans_model)
 
 gc.collect()
@@ -179,7 +168,7 @@ torch.set_num_threads(args.threads)
 print("ProtTrans model downloaded")
 
 
-#Load the Tm_Vec_Align TM model
+# Load the Tm_Vec_Align TM model
 tm_vec_model_config = trans_basic_block_Config.from_json(args.tm_vec_config)
 model_deep = trans_basic_block.load_from_checkpoint(
     args.tm_vec_model, config=tm_vec_model_config,
@@ -191,21 +180,21 @@ print("TM-Vec model loaded")
 
 
 
-#Read in query database
+# Read in query database
 query_database = np.load(args.database)
 
-#Embed all query sequences
-#Build query array and save the embeddings (will write them to output)
+# Embed all query sequences
+# Build query array and save the embeddings (will write them to output)
 queries = encode(flat_seqs, model_deep, model, tokenizer, device)
 
-#Build an indexed database
+# Build an indexed database
 index = load_database(args.database)
 
-#Return the nearest neighbors
+# Return the nearest neighbors
 k = args.k_nearest_neighbors
 D, I = query(index, queries, k)
 
-#Return the metadata for the nearest neighbor results
+# Return the metadata for the nearest neighbor results
 near_ids = []
 
 print("meta data loaded")
@@ -223,8 +212,6 @@ del model_deep  # need to clear space for DeepBLAST aligner
 # align nearest neighbors if true
 if args.deepblast_model is not None and args.output_format == 'alignment':
     # moving imports here because it may take a very long time
-    from deepblast.trainer import DeepBLAST
-    from deepblast.dataset.utils import pack_sequences
     from deepblast.dataset.utils import states2alignment
     from deepblast.utils import load_model
 
@@ -234,8 +221,7 @@ if args.deepblast_model is not None and args.output_format == 'alignment':
         device=device)
 
     align_model = align_model.to(device)
-    seq_db = Indexer(args.database_fasta, args.database_faidx)
-    seq_db.load()
+    seq_db = FastaFile(args.database_fasta)
 
     alignments = []
     with open(args.output, 'w') as fh:
@@ -243,14 +229,14 @@ if args.deepblast_model is not None and args.output_format == 'alignment':
             for j in range(I.shape[1]):
                 x = flat_seqs[i]
                 seq_i = metadata_database[I[i, j]]
-                y = seq_db[seq_i]
-                try :
+                y = seq_db.fetch(seq_i)
+                try:
                     pred_alignment = align_model.align(x, y)
                     # Note : there is an edge case that smith-waterman will throw errors,
                     # but needleman-wunsch won't.
                     x_aligned, y_aligned = states2alignment(pred_alignment, x, y)
                     alignments_i = [x_aligned, pred_alignment, y_aligned]
-                    #Write out the alignments
+                    # sWrite out the alignments
                     x, s, y = alignments_i
                     # TODO : not clear how to get the sequence IDS
                     ix, iy = format_ids(headers[i], seq_i)
@@ -260,8 +246,8 @@ if args.deepblast_model is not None and args.output_format == 'alignment':
                     print(f'No valid alignments found for {headers[i]} {seq_i}')
 
 
-#Outputting results
-#Write out the nearest neighbors
+# Outputting results
+# Write out the nearest neighbors
 # (if no database meta data is providedwrite out their database indices)
 if args.output_format == 'tabular':
     nids = pd.DataFrame(near_ids, index=headers)
@@ -274,6 +260,6 @@ if args.output_format == 'tabular':
     nids.to_csv(args.output, sep='\t', index=None)
 
 
-#Write out the embeddings
+# Write out the embeddings
 if args.output_embeddings is not None:
     np.save(args.output_embeddings, queries)
