@@ -43,7 +43,6 @@ setup(name='tm-vec',
           'SentencePiece',
       ],
       scripts=[
-          'scripts/build-fasta-index',
           'scripts/tmvec-build-database',
           'scripts/tmvec-search',
       ],
