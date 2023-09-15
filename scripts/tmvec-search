@@ -12,7 +12,6 @@ from pathlib import Path
 import argparse
 from pysam.libcfaidx import FastxFile, FastaFile
 
-
 parser = argparse.ArgumentParser(
     description='Process TM-Vec arguments', add_help=True)
 
@@ -151,11 +150,13 @@ else:
 if args.protrans_model is None:
     # Load the ProtTrans model and ProtTrans tokenizer
     tokenizer = T5Tokenizer.from_pretrained("Rostlab/prot_t5_xl_uniref50",
-                                            do_lower_case=False)
+                                            do_lower_case=False,
+                                            legacy=True)
     model = T5EncoderModel.from_pretrained("Rostlab/prot_t5_xl_uniref50")
 else:
     tokenizer = T5Tokenizer.from_pretrained(args.protrans_model,
-                                            do_lower_case=False)
+                                            do_lower_case=False,
+                                            legacy=True)
     model = T5EncoderModel.from_pretrained(args.protrans_model)
 
 gc.collect()
@@ -253,6 +254,9 @@ if args.output_format == 'tabular':
     nids = pd.DataFrame(near_ids, index=headers)
     nids.index.name = 'query_id'
     nids = pd.melt(nids.reset_index(), id_vars='query_id', var_name='rank', value_name='database_id')
+    # correct ranks to start from 1
+    nids['rank'] = nids['rank'] + 1
+
     tms = pd.DataFrame(D, index=headers)
     tms = pd.melt(tms, var_name='query_id', value_name='tm-score')
     nids = pd.concat((nids, tms[['tm-score']]), axis=1)
