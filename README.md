@@ -20,6 +20,14 @@ Once your conda enviroment is installed and activated (i.e. `conda activate tmve
 See the [pytorch](https://pytorch.org/) webpage for more details.
 
 # Models
+Download the model weights/config of the `Prot-T5-XL-UniRef50`:
+```
+mkdir Rostlab && cd "$_"
+wget https://zenodo.org/record/4644188/files/prot_t5_xl_uniref50.zip
+unzip prot_t5_xl_uniref50.zip
+cd ..
+```
+
 Download the model weights/config of the base TM-vec model trained on SwissModel pairs (trained on protein chains up to 300 residues long, works best on shorter sequences):
 ```
 wget https://users.flatironinstitute.org/thamamsy/public_www/tm_vec_swiss_model.ckpt
