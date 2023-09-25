@@ -20,7 +20,7 @@ Once your conda enviroment is installed and activated (i.e. `conda activate tmve
 See the [pytorch](https://pytorch.org/) webpage for more details.
 
 # Models
-Download the model weights/config of the `Prot-T5-XL-UniRef50`:
+It is recommended to first download the `Prot-T5-XL-UniRef50` model weights.  This can be done as follows.```
 ```
 mkdir Rostlab && cd "$_"
 wget https://zenodo.org/record/4644188/files/prot_t5_xl_uniref50.zip
