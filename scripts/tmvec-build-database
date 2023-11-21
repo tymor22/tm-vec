@@ -4,15 +4,12 @@ import numpy as np
 import pandas as pd
 import torch
 from tm_vec.embed_structure_model import trans_basic_block, trans_basic_block_Config
-from tm_vec.tm_vec_utils import featurize_prottrans, embed_tm_vec, encode
+from tm_vec.tm_vec_utils import encode
 from transformers import T5EncoderModel, T5Tokenizer
-import re
 import gc
-from Bio import SeqIO
-import faiss
+from pysam.libcfaidx import FastxFile
 from pathlib import Path
 import argparse
-import pickle
 
 
 parser = argparse.ArgumentParser(description='Process TM-Vec arguments', add_help=True)
@@ -104,15 +101,17 @@ print("TM-Vec model loaded")
 
 
 # Read in query sequences
-with open(args.input_fasta) as handle:
+with FastxFile(args.input_fasta) as query_fasta:
     headers = []
     seqs = []
-    for record in SeqIO.parse(handle, "fasta"):
-        headers.append(record.id)
-        seqs.append(str(record.seq))
+    for record in query_fasta:
+        headers.append(record.name)
+        # remove "*"" if present in sequence
+        # "*"" denotes stop codon in Prodigal
+        seqs.append(record.sequence.replace('*', ''))
 
 flat_seqs = [seqs[i] for i in range(len(seqs))]
-print("Sequences loaded.")
+print(f"Loaded {len(flat_seqs)} sequences")
 
 # Embed all query sequences
 encoded_database = encode(flat_seqs, model_deep, model, tokenizer, device)
