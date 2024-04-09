@@ -23,7 +23,7 @@ description = ('Structural similarity.')
 
 
 setup(name='tm-vec',
-      version='1.0.1',
+      version='1.0.3',
       license='BSD-3-Clause',
       description=description,
       author_email="tymorhamamsy@gmail.com",
@@ -34,6 +34,7 @@ setup(name='tm-vec',
           'scipy',
           'pandas',
           'torch',
+          'h5py',
           'scikit-learn',
           'pytorch-lightning',
           'matplotlib',

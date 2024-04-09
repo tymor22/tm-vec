@@ -9,6 +9,7 @@ from deepblast.dataset.utils import states2alignment
 from transformers import T5EncoderModel, T5Tokenizer
 import re
 import faiss
+import h5py
 
 
 #Function to extract ProtTrans embedding for a sequence
@@ -75,10 +76,71 @@ def encode_gen(sequences, model_deep, model, tokenizer, device):
         yield embedded_sequence
 
 
-def save_embeds(names, embeds, file_name):
-    with open(file_name, 'wb') as file:
-        for name, seq_embed in enumerate(zip(names, embeds)):
-            np.savez(file, **{str(name): seq_embed}, allow_pickle=False)
+def save_embeds(names, embeds, sequences, file_name):
+    """ Saves a list of embeddings, ids and corresponding sequences to a file
+
+
+    Parameters
+    ----------
+    names : iterable of str
+        List of names for the sequences
+    embeds : iterable of array_like
+        List of embeddings
+    sequences : iterable of str
+        List of sequences
+    file_name : str
+        Name of the file to save the embeddings
+    """
+    # cast to iterators
+    names, embeds, sequences = iter(names), iter(embeds), iter(sequences)
+    with h5py.File(file_name, 'a') as h5file:
+        name, embed, seq = next(names), next(embeds), next(sequences)
+        if isinstance(embed, torch.Tensor):
+            embed = embed.cpu().detach().numpy()
+
+        embed = embed.reshape(1, embed.shape[0], embed.shape[1])
+        # Create a dataset with the name as the key
+        seq_embed = h5file.create_dataset(
+            "embedding", data=embed,
+            maxshape=(None, embed.shape[1], embed.shape[2]),
+            chunks=True)
+        seq_embed.attrs['sequence'] = [seq]
+        seq_embed.attrs['id'] = [name]
+        n = 1
+        for name, embed, seq in zip(names, embeds, sequences):
+            n += 1
+            if isinstance(embed, torch.Tensor):
+                embed = embed.cpu().detach().numpy()
+
+            # Create a dataset with the name as the key
+            seq_embed.resize(n, axis=0)
+            seq_embed[-1] = embed
+            seq_embed.attrs['sequence'] = seq_embed.attrs['sequence'] + [seq]
+            seq_embed.attrs['id'] = seq_embed.attrs['id'] + [name]
+
+
+def load_embeds(file_name):
+    """ Load embeddings from a file
+
+    Parameters
+    ----------
+    file_name : str
+        Name of the file to load the embeddings from
+
+    Returns
+    -------
+    name : iterable of str
+        List of names for the sequences
+    embed : iterable of np.array
+        List of embeddings
+    seq : iterable of str
+    """
+    with h5py.File(file_name, 'r') as h5file:
+        for name in h5file:
+            embed = h5file[name][()]
+            seq = h5file[name].attrs['sequence']
+            name = h5file[name].attrs['id']
+            yield name, embed, seq
 
 
 def load_database(path):
@@ -88,7 +150,6 @@ def load_database(path):
     index = faiss.IndexFlatIP(d)
     faiss.normalize_L2(lookup_database)
     index.add(lookup_database)
-
     return(index)
 
 

@@ -5,7 +5,8 @@ import torch
 from tm_vec.embed_structure_model import (trans_basic_block,
                                           trans_basic_block_Config)
 from tm_vec.tm_vec_utils import (featurize_prottrans, embed_tm_vec,
-                                 format_ids, encode, load_database, query)
+                                 format_ids, encode, load_database,
+                                 query, save_embeds)
 from tm_vec.fasta import Indexer
 from deepblast.dataset.utils import states2alignment
 from transformers import T5EncoderModel, T5Tokenizer
@@ -264,4 +265,4 @@ if args.output_format == 'tabular':
 
 #Write out the embeddings
 if args.output_embeddings is not None:
-    np.save(args.output_embeddings, queries)
+    save_embeds(headers, args.output_embeddings, queries, flat_seqs)

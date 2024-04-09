@@ -85,7 +85,9 @@ print("Sequences inputed")
 
 
 #Set device
-if torch.cuda.is_available() and args.device is not None:
+if args.device == 'cpu':
+    device = torch.device('cpu')
+elif torch.cuda.is_available() and args.device is not None:
     if args.device == 'gpu':
         device = torch.device(f'cuda:0')
     else:
@@ -124,4 +126,4 @@ print("TM-Vec model loaded")
 queries = encode_gen(flat_seqs, model_deep, model, tokenizer, device)
 
 #Write out the embeddings
-save_embeds(headers, queries, args.output_embeddings)
+save_embeds(headers, queries, flat_seqs, args.output_embeddings)
