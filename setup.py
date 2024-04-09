@@ -46,6 +46,7 @@ setup(name='tm-vec',
       scripts=[
           'scripts/tmvec-build-database',
           'scripts/tmvec-search',
+          'scripts/tmvec-encode',
       ],
       classifiers=classifiers,
       package_data={
