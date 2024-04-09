@@ -138,7 +138,9 @@ print("Sequences inputed")
 metadata_database = np.load(args.metadata)
 
 # Set device
-if torch.cuda.is_available() and args.device is not None:
+if args.device == 'cpu':
+    device = torch.device('cpu')
+elif torch.cuda.is_available() and args.device is not None:
     if args.device == 'gpu':
         device = torch.device(f'cuda:0')
     else:
