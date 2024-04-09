@@ -23,7 +23,7 @@ description = ('Structural similarity.')
 
 
 setup(name='tm-vec',
-      version='1.0.3',
+      version='1.0.4',
       license='BSD-3-Clause',
       description=description,
       author_email="tymorhamamsy@gmail.com",
