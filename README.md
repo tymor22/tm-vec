@@ -11,13 +11,13 @@ See the following fork for continue maintainence / developments : https://github
 
 First create a conda environment with python=3.9 installed.  If you are using cpu, use
 
-`conda create -n tmvec faiss-cpu python=3.9 -c pytorch`
+`conda create -n tmvec faiss-cpu python=3.9 -c conda-forge`
 
 If the installation fails, you may need to install mkl via `conda install mkl=2021 mkl_fft `
 
 If you are using gpu use
 
-`conda create -n tmvec faiss-gpu python=3.9 -c pytorch`
+`conda create -n tmvec faiss-gpu python=3.9 -c conda-forge`
 
 Once your conda enviroment is installed and activated (i.e. `conda activate tmvec`), then install tm-vec via
 `pip install tm-vec`. If you are using a GPU, you may need to reinstall the gpu version of pytorch.
